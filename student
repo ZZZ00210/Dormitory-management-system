@@ -1,0 +1,44 @@
+public class AbsentServlet extends HttpServlet {
+
+    private BuildingService buildingService = new BuildingServiceImpl();
+    private DormitoryService dormitoryService = new DormitoryServiceImpl();
+    private StudentService studentService = new StudentServiceImpl();
+    private AbsentService absentService = new AbsentServieImpl();
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        this.doPost(req, resp);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");
+        String method = req.getParameter("method");
+        switch (method){
+            case "save":
+                String buildingIdStr = req.getParameter("buildingId");
+                Integer buildingId = Integer.parseInt(buildingIdStr);
+                String dormitoryIdStr = req.getParameter("dormitoryId");
+                Integer dormitoryId = Integer.parseInt(dormitoryIdStr);
+                String studentIdStr = req.getParameter("studentId");
+                Integer studentId = Integer.parseInt(studentIdStr);
+                String reason = req.getParameter("reason");
+                String date = req.getParameter("date");
+                HttpSession session = req.getSession();
+                DormitoryAdmin dormitoryAdmin = (DormitoryAdmin) session.getAttribute("dormitoryAdmin");
+                this.absentService.save(new Absent(buildingId, dormitoryId, studentId, dormitoryAdmin.getId(), date,reason));
+                resp.sendRedirect("/absent?method=init");
+                break;
+            case "list":
+                req.setAttribute("list", this.absentService.list());
+                req.getRequestDispatcher("absentrecord.jsp").forward(req, resp);
+                break;
+            case "search":
+                String key = req.getParameter("key");
+                String value = req.getParameter("value");
+                req.setAttribute("list", this.absentService.search(key, value));
+                req.getRequestDispatcher("absentrecord.jsp").forward(req, resp);
+                break;
+        }
+    }
+}
