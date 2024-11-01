@@ -1,0 +1,27 @@
+public List<Student> search(String key, String value) {
+        Connection connection = JDBCUtil.getConnection();
+        String sql = "select s.id,s.number,s.name,s.gender,s.dormitory_id,d.name,s.state,s.create_date from student s,dormitory d where s.dormitory_id = d.id and s."+key+" like '%"+value+"%'";
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+        List<Student> list = new ArrayList<>();
+        try {
+            statement = connection.prepareStatement(sql);
+            resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                int id = resultSet.getInt(1);
+                String number = resultSet.getString(2);
+                String name = resultSet.getString(3);
+                String gender = resultSet.getString(4);
+                Integer dormitoryId = resultSet.getInt(5);
+                String dormitoryName = resultSet.getString(6);
+                String state = resultSet.getString(7);
+                String createDate = resultSet.getString(8);
+                list.add(new Student(id, number, name, gender, dormitoryId, dormitoryName, state, createDate));
+            }
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            JDBCUtil.release(connection, statement, resultSet);
+        }
+        return list;
+    }
